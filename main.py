@@ -1,4 +1,5 @@
-from plyer import notification
+from winotify import Notification
+
 from time import sleep
 import ctypes
 
@@ -18,7 +19,7 @@ class Pc:
     
     @staticmethod
     def is_workstation_locked():
-        if (user32.GetForegroundWindow() % 10 == 0):
+        if user32.GetForegroundWindow() % 10 == 0:
             return True
         return False
         
@@ -46,36 +47,39 @@ class NotificationManager:
         self.__app_name = "Eye Care Reminder"
         self.__timeout = 20
 
-    def send_notification(self):
-        notification.notify(
+    def send_notification(self, sound=False):
+        toast = Notification(
+            app_id=self.__app_name,
             title=self.title,
-            message=self.message,
-            app_name=self.__app_name,
-            timeout=self.__timeout
+            msg=self.message,
+            duration="short",
         )
+        if sound:
+            toast.set_audio("ms-winsoundevent:Notification.Reminder", loop=False)
+        toast.show()
   
     
 if __name__ == "__main__":
     user = User()
     notifier = NotificationManager("20 Minutes 20 Seconds", "Time to look away for 20 seconds!")
-    
+    notifier_init = NotificationManager("Hi!", "Eye Care Reminder is running!")
+    notifier_init.send_notification()
+
     while True:
         i = 0
         time_for_reset = 20
         while i < 600:
             time_for_reset = 20
-            print(i, end="\r")
             sleep(2)
-            print("\n", user.is_active())
             
             while not user.is_active():
                 sleep(2)
                 time_for_reset -= 2
-                print("Waiting for user to be active again...", time_for_reset)
+                #print("Waiting for user to be active again...", time_for_reset)
                 if time_for_reset <= 0:
                     i = 0
             if time_for_reset < 20:
                 i += 20 - time_for_reset // 2
             
             i += 1
-        notifier.send_notification()
+        notifier.send_notification(sound=True)
