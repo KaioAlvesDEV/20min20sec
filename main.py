@@ -63,15 +63,19 @@ if __name__ == "__main__":
         i = 0
         time_for_reset = 20
         while i < 600:
+            time_for_reset = 20
             print(i, end="\r")
             sleep(2)
             print("\n", user.is_active())
+            
             while not user.is_active():
                 sleep(2)
                 time_for_reset -= 2
                 print("Waiting for user to be active again...", time_for_reset)
                 if time_for_reset <= 0:
                     i = 0
-                    time_for_reset = 20
+            if time_for_reset < 20:
+                i += 20 - time_for_reset // 2
+            
             i += 1
         notifier.send_notification()
